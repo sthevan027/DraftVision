@@ -2,7 +2,7 @@
 
 > Plataforma de análise estratégica de jogadores e times de League of Legends para organizações de esports, analistas e coaches profissionais.
 
-[![CI](https://github.com/sthev/DraftVision/actions/workflows/ci.yml/badge.svg)](https://github.com/sthev/DraftVision/actions/workflows/ci.yml)
+[![CI](https://github.com/sthevan027/DraftVision/actions/workflows/ci.yml/badge.svg)](https://github.com/sthevan027/DraftVision/actions/workflows/ci.yml)
 
 ## Objetivo
 
@@ -84,7 +84,7 @@ draftvision/
 
 ```bash
 # Clone o repositório
-git clone https://github.com/sthev/DraftVision.git
+git clone https://github.com/sthevan027/DraftVision.git
 cd DraftVision
 
 # Backend
