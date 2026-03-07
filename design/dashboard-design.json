@@ -1,0 +1,42 @@
+{
+  "app": "DraftVision",
+  "theme": "dark",
+  "colors": {
+    "primary": "#7C3AED",
+    "secondary": "#1F2937",
+    "background": "#0F172A",
+    "accent": "#22C55E"
+  },
+  "layout": {
+    "sidebar": [
+      "Dashboard",
+      "Players",
+      "Teams",
+      "Comparisons",
+      "Scouting",
+      "Reports"
+    ],
+    "dashboard_widgets": [
+      {
+        "type": "stat",
+        "title": "Players Monitored"
+      },
+      {
+        "type": "stat",
+        "title": "Teams Created"
+      },
+      {
+        "type": "chart",
+        "title": "Winrate Trend"
+      },
+      {
+        "type": "chart",
+        "title": "KDA Evolution"
+      },
+      {
+        "type": "chart",
+        "title": "Champion Pool"
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "logo": {
+    "name": "DraftVision",
+    "symbol": "strategic_eye",
+    "style": "minimal_esports",
+    "colors": {
+      "primary": "#7C3AED",
+      "secondary": "#0F172A",
+      "accent": "#22C55E"
+    },
+    "elements": [
+      "eye",
+      "rift_map_lines",
+      "draft_arrows"
+    ],
+    "font": {
+      "family": "Orbitron",
+      "weight": "bold",
+      "case": "uppercase"
+    }
+  }
+}

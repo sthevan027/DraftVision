@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend:
+    name: Backend (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          cd app/api
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt 2>/dev/null || pip install -r requirements.txt
+
+      - name: Lint (Ruff)
+        run: |
+          cd app/api
+          pip install ruff
+          ruff check .
+        continue-on-error: true
+
+      - name: Format check (Black)
+        run: |
+          cd app/api
+          pip install black
+          black --check .
+        continue-on-error: true
+
+      - name: Test
+        run: |
+          cd app/api
+          pip install pytest httpx
+          pytest -v --tb=short
+
+  frontend:
+    name: Frontend (Next.js)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: app/web/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: |
+          cd app/web
+          pnpm install
+
+      - name: Lint
+        run: |
+          cd app/web
+          pnpm run lint 2>/dev/null || echo "Lint script not configured"
+
+      - name: Build
+        run: |
+          cd app/web
+          pnpm run build

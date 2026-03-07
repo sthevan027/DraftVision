@@ -1,0 +1,39 @@
+name: Lint
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python - Ruff
+        uses: astral-sh/setup-ruff@v4
+        with:
+          ruff-version: latest
+      - run: ruff check app/api
+        continue-on-error: true
+
+      - name: Node - pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Node - ESLint
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: app/web/pnpm-lock.yaml
+
+      - run: |
+          cd app/web
+          pnpm install
+          pnpm run lint 2>/dev/null || true
+        continue-on-error: true
