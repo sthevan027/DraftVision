@@ -29,3 +29,8 @@ Possíveis evoluções:
 - Recomendação de picks
 - Integração com scrims
 - Análise de macro gameplay
+
+
+## Plano detalhado do V1
+
+- [Plano de execução do V1](./V1_EXECUTION_PLAN.md)

@@ -1,8 +1,11 @@
 """
 DraftVision API - Plataforma de análise estratégica de LoL.
 """
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from api.players.routes import router as players_router
 
 app = FastAPI(
     title="DraftVision API",
@@ -27,3 +30,6 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+app.include_router(players_router)
