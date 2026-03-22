@@ -7,7 +7,7 @@ from api.players.service import PlayerService
 from api.core.deps import get_repository
 from api.core.repository import PostgresRepository
 from api.core.storage import AsyncInMemoryStore
-from api.riot.client import RiotClient
+from api.riot.client import get_riot_client
 
 router = APIRouter(prefix="/players", tags=["players"])
 
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/players", tags=["players"])
 def get_player_service(
     repo: PostgresRepository | AsyncInMemoryStore = Depends(get_repository),
 ) -> PlayerService:
-    return PlayerService(riot_client=RiotClient(), repository=repo)
+    return PlayerService(riot_client=get_riot_client(), repository=repo)
 
 
 @router.post("/sync", response_model=SyncPlayerResponse)

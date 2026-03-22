@@ -13,7 +13,7 @@ from api.core.storage import (
     PlayerMatchStatsRecord,
     PlayerRecord,
 )
-from api.riot.client import RiotClient
+from api.riot.client import RiotClientProtocol
 
 PROFILE_CACHE_TTL = 300  # 5 minutes
 
@@ -21,7 +21,7 @@ PROFILE_CACHE_TTL = 300  # 5 minutes
 class PlayerService:
     def __init__(
         self,
-        riot_client: RiotClient,
+        riot_client: RiotClientProtocol,
         repository: PostgresRepository | AsyncInMemoryStore,
     ) -> None:
         self.riot_client = riot_client
@@ -47,7 +47,9 @@ class PlayerService:
             )
         )
 
-        matches = self.riot_client.get_recent_ranked_matches(riot_player.puuid, count=20)
+        matches = self.riot_client.get_recent_ranked_matches(
+            riot_player.puuid, count=20, region=riot_player.region
+        )
         for match in matches:
             await self.repo.upsert_match(
                 MatchRecord(
