@@ -1,12 +1,12 @@
 # Roadmap DraftVision
 
-## V1 — Fundação
+## V1 — Fundação ✅
 
-- [ ] Integração Riot API (account-v1, summoner-v4, league-v4, match-v5)
-- [ ] Perfil de jogador
-- [ ] Histórico de partidas
-- [ ] Cálculo de métricas (KDA, winrate, farm/min, vision)
-- [ ] Dashboard inicial
+- [x] Integração Riot API (account-v1, match-v5)
+- [x] Perfil de jogador
+- [x] Histórico de partidas (20 últimas ranqueadas)
+- [x] Cálculo de métricas (KDA, winrate, farm/min, vision)
+- [x] Dashboard inicial
 
 ## V2 — Times e Comparação
 

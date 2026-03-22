@@ -1,53 +1,46 @@
 # Status atual do projeto (diagnóstico rápido)
 
-## O que já foi feito
+## O que já foi feito (V1 completo)
 
 ### Estrutura e direcionamento
-- Repositório organizado com backend (`app/api`), frontend (`app/web`) e documentação de produto/arquitetura.
-- Visão de produto, arquitetura, banco, roadmap e guias de desenvolvimento já documentados.
+- Repositório organizado com backend (`app/api`), frontend (`app/web`) e documentação.
+- Visão de produto, arquitetura, banco, roadmap e guias de desenvolvimento.
 
-### Backend (implementado)
-- API FastAPI inicial criada com metadados da aplicação.
-- CORS configurado para consumo local pelo frontend (`http://localhost:3000`).
-- Endpoints básicos já funcionais:
-  - `GET /` retorna nome e versão da API.
-  - `GET /health` retorna status de saúde.
-- Testes automatizados básicos para os dois endpoints existentes.
+### Backend (V1 implementado)
+- API FastAPI com CORS para frontend local.
+- **PostgreSQL**: modelos SQLAlchemy, repositório async, migrações Alembic.
+- **Redis**: cache de perfil (TTL 5 min), invalidação no sync.
+- **Riot API**: cliente real (account-v1, match-v5) com retry/backoff para 429 e 503.
+- Endpoints: `POST /players/sync`, `GET /players/{puuid}/profile`.
+- Fallback para MockRiotClient quando RIOT_API_KEY não está definida.
+- Testes automatizados para métricas, fluxo sync/profile e idempotência.
 
-### Frontend (implementado)
-- App Next.js inicial configurada.
-- Página inicial com branding e descrição da proposta do produto.
-- Configuração base de TypeScript, Tailwind e lint.
+### Frontend (V1 implementado)
+- Next.js com App Router, Tailwind, design system (cores do dashboard-design).
+- Página inicial, Dashboard (status API), Sincronizar jogador, Perfil com métricas.
+- API client (sync, getProfile, healthCheck).
+- Sidebar e layout com navegação.
 
-## O que falta (gap para MVP)
+## O que falta (V2+)
 
-### Funcionalidades de negócio
-De acordo com o roadmap, os itens de V1, V2 e V3 ainda estão pendentes, incluindo:
-- Integração real com Riot API.
-- Perfil de jogador e histórico de partidas.
-- Cálculo de métricas (KDA, winrate, farm/min, visão).
-- Dashboard inicial com dados.
+### Funcionalidades de negócio (V2 e V3)
 - Gestão de times e comparação de jogadores.
 - Champion pool analysis.
 - Scouting automático, Hidden Talent Detector e análise de draft.
 
-### Backend técnico
-- Implementar módulos reais sob `api/players`, `api/matches`, `api/teams`, `api/analytics`, `api/scouting` (atualmente apenas placeholders de pacote).
-- Definir modelos de dados/persistência e fluxo com PostgreSQL/Redis.
-- Adicionar camada de domínio/use cases conforme arquitetura proposta na documentação.
+### Backend técnico (evolução)
+- Módulos `api/teams`, `api/scouting` (V2/V3).
+- Migrations para seeds de desenvolvimento.
 
-### Frontend técnico
-- Criar rotas e componentes de dashboard, players, teams, draft e reports.
-- Conectar frontend ao backend por cliente HTTP e tratar estados de loading/erro.
-- Incluir visualizações de dados (gráficos/tabelas) além da landing inicial.
+### Frontend técnico (evolução)
+- Rotas teams, draft e reports (V2/V3).
+- Gráficos com Chart.js para tendências e evolução.
 
 ### Qualidade e operação
-- Expandir suíte de testes (unitários + integração) para módulos de negócio.
-- Configurar pipeline CI para lint + testes de backend e frontend em todos os PRs.
-- Definir estratégia inicial de migração de banco e seeds.
+- CI já configurado (lint + testes backend, build frontend).
+- Expandir testes de integração com PostgreSQL/Redis.
 
-## Próximos passos sugeridos (ordem prática)
-1. Fechar vertical slice de V1: Riot API → ingestão de partidas → persistência → endpoint de perfil.
-2. Publicar dashboard inicial consumindo endpoints reais (mesmo com métricas mínimas).
-3. Evoluir cobertura de testes junto com cada módulo entregue.
-4. Só depois avançar para V2 (times/comparação) e V3 (scouting/draft).
+## Próximos passos (V2)
+1. Criação de times e rosters.
+2. Comparação entre jogadores.
+3. Champion pool analysis.
