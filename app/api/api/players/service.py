@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import HTTPException
 
 from api.analytics.metrics import ProfileMetrics, calculate_profile_metrics
+from api.core.cache import get_cached_profile, invalidate_profile, set_cached_profile
 from api.core.repository import PostgresRepository
 from api.core.storage import (
     AsyncInMemoryStore,
@@ -13,6 +14,8 @@ from api.core.storage import (
     PlayerRecord,
 )
 from api.riot.client import RiotClient
+
+PROFILE_CACHE_TTL = 300  # 5 minutes
 
 
 class PlayerService:
@@ -68,9 +71,14 @@ class PlayerService:
                 )
             )
 
+        await invalidate_profile(riot_player.puuid)
         return riot_player.puuid, len(matches)
 
     async def get_profile(self, puuid: str) -> dict:
+        cached = await get_cached_profile(puuid)
+        if cached:
+            return cached
+
         player = await self.repo.get_player(puuid)
         if not player:
             raise HTTPException(status_code=404, detail="Player not found")
@@ -78,7 +86,7 @@ class PlayerService:
         stats = await self.repo.list_player_stats(puuid)
         metrics: ProfileMetrics = calculate_profile_metrics(stats)
 
-        return {
+        profile = {
             "player": {
                 "puuid": player.puuid,
                 "summoner_name": player.summoner_name,
@@ -93,3 +101,5 @@ class PlayerService:
             },
             "updated_at": player.updated_at.isoformat(),
         }
+        await set_cached_profile(puuid, profile, ttl_seconds=PROFILE_CACHE_TTL)
+        return profile
