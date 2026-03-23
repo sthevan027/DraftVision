@@ -1,7 +1,4 @@
-"""In-memory persistence for the V1 vertical slice.
-
-This module keeps storage intentionally simple for local development and tests.
-"""
+"""In-memory persistence and shared record types for the V1 vertical slice."""
 
 from __future__ import annotations
 
@@ -64,3 +61,33 @@ class InMemoryStore:
 
 
 store = InMemoryStore()
+
+
+class AsyncInMemoryStore:
+    """Async adapter for InMemoryStore (tests / fallback)."""
+
+    def __init__(self) -> None:
+        self._store = InMemoryStore()
+
+    def now(self) -> datetime:
+        return self._store.now()
+
+    async def upsert_player(self, record: PlayerRecord) -> None:
+        self._store.upsert_player(record)
+
+    async def upsert_match(self, record: MatchRecord) -> None:
+        self._store.upsert_match(record)
+
+    async def upsert_player_match_stats(self, record: PlayerMatchStatsRecord) -> None:
+        self._store.upsert_player_match_stats(record)
+
+    async def get_player(self, puuid: str) -> PlayerRecord | None:
+        return self._store.players.get(puuid)
+
+    async def list_player_stats(self, puuid: str) -> list[PlayerMatchStatsRecord]:
+        return self._store.list_player_stats(puuid)
+
+    def _clear_for_tests(self) -> None:
+        self._store.players.clear()
+        self._store.matches.clear()
+        self._store.player_match_stats.clear()

@@ -1,15 +1,8 @@
 from fastapi.testclient import TestClient
 
-from api.core.storage import store
 from main import app
 
 client = TestClient(app)
-
-
-def setup_function() -> None:
-    store.players.clear()
-    store.matches.clear()
-    store.player_match_stats.clear()
 
 
 def test_sync_player_and_profile_flow() -> None:
@@ -55,4 +48,6 @@ def test_sync_is_idempotent_for_same_player_matches() -> None:
 
     puuid = first.json()["puuid"]
     assert puuid == second.json()["puuid"]
-    assert len(store.list_player_stats(puuid)) == 20
+    # Idempotency: profile still has 20 matches after second sync
+    profile = client.get(f"/players/{puuid}/profile").json()
+    assert profile["metrics"]["matches"] == 20

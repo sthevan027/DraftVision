@@ -5,22 +5,38 @@ from __future__ import annotations
 from fastapi import HTTPException
 
 from api.analytics.metrics import ProfileMetrics, calculate_profile_metrics
-from api.core.storage import MatchRecord, PlayerMatchStatsRecord, PlayerRecord, store
-from api.riot.client import RiotClient
+from api.core.cache import get_cached_profile, invalidate_profile, set_cached_profile
+from api.core.repository import PostgresRepository
+from api.core.storage import (
+    AsyncInMemoryStore,
+    MatchRecord,
+    PlayerMatchStatsRecord,
+    PlayerRecord,
+)
+from api.riot.client import RiotClientProtocol
+
+PROFILE_CACHE_TTL = 300  # 5 minutes
 
 
 class PlayerService:
-    def __init__(self, riot_client: RiotClient) -> None:
+    def __init__(
+        self,
+        riot_client: RiotClientProtocol,
+        repository: PostgresRepository | AsyncInMemoryStore,
+    ) -> None:
         self.riot_client = riot_client
+        self.repo = repository
 
-    def sync_player(self, game_name: str, tag_line: str, region: str) -> tuple[str, int]:
+    async def sync_player(
+        self, game_name: str, tag_line: str, region: str
+    ) -> tuple[str, int]:
         riot_player = self.riot_client.get_player(
             game_name=game_name,
             tag_line=tag_line,
             region=region,
         )
-        now = store.now()
-        store.upsert_player(
+        now = self.repo.now()
+        await self.repo.upsert_player(
             PlayerRecord(
                 puuid=riot_player.puuid,
                 game_name=riot_player.game_name,
@@ -31,9 +47,11 @@ class PlayerService:
             )
         )
 
-        matches = self.riot_client.get_recent_ranked_matches(riot_player.puuid, count=20)
+        matches = self.riot_client.get_recent_ranked_matches(
+            riot_player.puuid, count=20, region=riot_player.region
+        )
         for match in matches:
-            store.upsert_match(
+            await self.repo.upsert_match(
                 MatchRecord(
                     match_id=match.match_id,
                     queue=match.queue,
@@ -41,7 +59,7 @@ class PlayerService:
                     played_at=match.played_at,
                 )
             )
-            store.upsert_player_match_stats(
+            await self.repo.upsert_player_match_stats(
                 PlayerMatchStatsRecord(
                     puuid=riot_player.puuid,
                     match_id=match.match_id,
@@ -55,17 +73,22 @@ class PlayerService:
                 )
             )
 
+        await invalidate_profile(riot_player.puuid)
         return riot_player.puuid, len(matches)
 
-    def get_profile(self, puuid: str) -> dict:
-        player = store.players.get(puuid)
+    async def get_profile(self, puuid: str) -> dict:
+        cached = await get_cached_profile(puuid)
+        if cached:
+            return cached
+
+        player = await self.repo.get_player(puuid)
         if not player:
             raise HTTPException(status_code=404, detail="Player not found")
 
-        stats = store.list_player_stats(puuid)
+        stats = await self.repo.list_player_stats(puuid)
         metrics: ProfileMetrics = calculate_profile_metrics(stats)
 
-        return {
+        profile = {
             "player": {
                 "puuid": player.puuid,
                 "summoner_name": player.summoner_name,
@@ -80,6 +103,5 @@ class PlayerService:
             },
             "updated_at": player.updated_at.isoformat(),
         }
-
-
-player_service = PlayerService(riot_client=RiotClient())
+        await set_cached_profile(puuid, profile, ttl_seconds=PROFILE_CACHE_TTL)
+        return profile
